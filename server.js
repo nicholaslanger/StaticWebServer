@@ -11,33 +11,39 @@ function NewRequest(req, res) {
     if (filename === '') {
         filename = 'index.html';
     }
-    var fullpath = path.join(public_dir, filename);
-    fs.readFile(fullpath, (err, data) => {
-       if (err) {
-            res.writeHead(404, {'Content-Type': 'text/plain'});
-            res.write('Oh no! Could not find file');
-            res.end();
-       }
-       else {
-            if (path.extname(filename) === '.html'){
-                res.writeHead(200, {'Content-Type': 'text/html'});
-            }else if (path.extname(filename) === '.jpg'){
-                res.writeHead(200, {'Content-Type': 'image/jpeg'});
-            }else if (path.extname(filename) === '.png'){
-                res.writeHead(200, {'Content-Type': 'image/png'});
-            }else if (path.extname(filename) === '.js') {
-                res.writeHead(200, {'Content-Type': 'text/javascript'});
-            }else if (path.extname(filename) === '.css'){
-                res.writeHead(200, {'Content-Type': 'text/css'});
-            }else if(path.extname(filename) === '.json'){
-                res.writeHead(200, {'Content-Type': 'application/json'});
-            }else {
-                res.writeHead(200, {'Content-Type': 'text/plain'});
-            }
-            res.write(data);
-            res.end();
-       }
-    });
+
+    if (req.method === 'GET'){
+
+        var fullpath = path.join(public_dir, filename);
+        fs.readFile(fullpath, (err, data) => {
+        if (err) {
+                res.writeHead(404, {'Content-Type': 'text/plain'});
+                res.write('Oh no! Could not find file');
+                res.end();
+        }
+        else {
+                if (path.extname(filename) === '.html'){
+                    res.writeHead(200, {'Content-Type': 'text/html'});
+                }else if (path.extname(filename) === '.jpg'){
+                    res.writeHead(200, {'Content-Type': 'image/jpeg'});
+                }else if (path.extname(filename) === '.png'){
+                    res.writeHead(200, {'Content-Type': 'image/png'});
+                }else if (path.extname(filename) === '.js') {
+                    res.writeHead(200, {'Content-Type': 'text/javascript'});
+                }else if (path.extname(filename) === '.css'){
+                    res.writeHead(200, {'Content-Type': 'text/css'});
+                }else if(path.extname(filename) === '.json'){
+                    res.writeHead(200, {'Content-Type': 'application/json'});
+                }else {
+                    res.writeHead(200, {'Content-Type': 'text/plain'});
+                }
+                res.write(data);
+                res.end();
+        }
+        });
+    }else if (req.method === 'POST'){
+        
+    }
 }
 
 var server = http.createServer(NewRequest);
