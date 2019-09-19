@@ -6,43 +6,95 @@ var path = require('path');
 var port = 8000;
 var public_dir = path.join(__dirname, 'public');
 
+var members = {};
+fs.readFile('public/data/members_test.json', (err, data) => {
+    if (err) throw err;
+    members = JSON.parse(data);
+});
+
 function NewRequest(req, res) {
+    // console.log(res);
+
     var filename = req.url.substring(1);
     if (filename === '') {
         filename = 'index.html';
     }
 
-    if (req.method === 'GET'){
+    var dict = new Map();
+    dict.set('.html', 'text/html');
+    dict.set('.jpg', 'image/jpeg');
+    dict.set('.png', 'image/png');
+    dict.set('.js', 'text/javascript');
+    dict.set('.css', 'text/css');
+    dict.set('.json', 'application/json');
 
+    if (req.method === 'GET'){
+        //console.log(req.headers);
         var fullpath = path.join(public_dir, filename);
         fs.readFile(fullpath, (err, data) => {
-        if (err) {
+            if (err) {
                 res.writeHead(404, {'Content-Type': 'text/plain'});
                 res.write('Oh no! Could not find file');
                 res.end();
-        }
-        else {
-                if (path.extname(filename) === '.html'){
-                    res.writeHead(200, {'Content-Type': 'text/html'});
-                }else if (path.extname(filename) === '.jpg'){
-                    res.writeHead(200, {'Content-Type': 'image/jpeg'});
-                }else if (path.extname(filename) === '.png'){
-                    res.writeHead(200, {'Content-Type': 'image/png'});
-                }else if (path.extname(filename) === '.js') {
-                    res.writeHead(200, {'Content-Type': 'text/javascript'});
-                }else if (path.extname(filename) === '.css'){
-                    res.writeHead(200, {'Content-Type': 'text/css'});
-                }else if(path.extname(filename) === '.json'){
-                    res.writeHead(200, {'Content-Type': 'application/json'});
-                }else {
-                    res.writeHead(200, {'Content-Type': 'text/plain'});
-                }
+            }
+            else {
+                res.writeHead(200, {'Content-Type' : dict.get(path.extname(filename))});
                 res.write(data);
                 res.end();
-        }
+            }
         });
     }else if (req.method === 'POST'){
-        //edit
+        let body = '';
+        req.on('data', (chunk) => {
+            body += chunk.toString();
+        });
+        req.on('end', () => {
+            body = decodeURIComponent(body);
+            let params = body.split('&');
+            let email = '';
+            const keyValPairs = {};
+
+            params.forEach(param => {
+                const [key, value] = param.split('=');
+                if (key === 'email') {
+                    email = value;
+                } else {
+                    keyValPairs[key] = value;
+                }
+            });
+
+            const output = {};
+            output[email] = keyValPairs;
+            const ret = {};
+
+            for (var key in members) {
+                ret[key] = members[key];
+            }
+            for (var key in output){
+                ret[key] = output[key];
+            }
+
+            members = ret;
+            var json = JSON.stringify(ret);
+            fs.writeFile('public/data/members_test.json', json, function(err){
+
+            });
+
+            filename = 'join.html'
+            var fullpath = path.join(public_dir, filename);
+            fs.readFile(fullpath, (err, data) => {
+                if (err) {
+                    res.writeHead(404, {'Content-Type': 'text/plain'});
+                    res.write('Oh no! Could not find file');
+                    res.end();
+                }
+                else {
+                    res.writeHead(200, {'Content-Type' : dict.get(path.extname(filename))});
+                    res.write(data);
+                    res.end();
+                }
+            });
+        });
     }
 }
 

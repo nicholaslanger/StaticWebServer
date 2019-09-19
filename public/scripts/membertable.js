@@ -7,7 +7,7 @@ function Init() {
 }
 
 function UpdateMembersTable() {
-    GetJson('data/members.json', (err, data) => {
+    GetJson('data/members_test.json', (err, data) => {
         var memberbody = document.getElementById('memberbody');
         while (memberbody.firstChild) {
             memberbody.removeChild(memberbody.firstChild);
