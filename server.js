@@ -6,14 +6,14 @@ var path = require('path');
 var port = 8000;
 var public_dir = path.join(__dirname, 'public');
 
+//global variable of memebers to prevent race condition
 var members = {};
-fs.readFile('public/data/members_test.json', (err, data) => {
+fs.readFile('public/data/members.json', (err, data) => {
     if (err) throw err;
     members = JSON.parse(data);
 });
 
 function NewRequest(req, res) {
-    // console.log(res);
 
     var filename = req.url.substring(1);
     if (filename === '') {
@@ -76,7 +76,7 @@ function NewRequest(req, res) {
 
             members = ret;
             var json = JSON.stringify(ret);
-            fs.writeFile('public/data/members_test.json', json, function(err){
+            fs.writeFile('public/data/members.json', json, function(err){
 
             });
 
